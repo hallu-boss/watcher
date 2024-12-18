@@ -1,4 +1,15 @@
+import os
 import cv2
+import pickle
+import structureDefinitions as sd
+from argparse import ArgumentParser
+
+def prompt(text: str, actions: dict[str, callable]) -> None:
+    while True:
+        resp = input(text)
+        if resp in actions:
+            actions[resp]()
+            break
 
 class ParkingSpace:
     def __init__(self, pos, width, height):
@@ -14,12 +25,16 @@ class ParkingSpace:
     def beginEnd(self):
         return self.pos, (self.pos[0] + self.width, self.pos[1] + self.height)
 
-
 spacesPos = []
 
 drawing = False
 dstart_x, dstart_y = -1, -1
 temp_rect = None
+
+def writeList(file_path, array):
+    with open(file_path, "wb") as f:
+        pickle.dump(array, f)
+        print(f"Positions saved into {file_path}")
 
 def handler(event, x, y, flags, param):
     global spacesPos, drawing, temp_rect, dstart_x, dstart_y
@@ -32,7 +47,8 @@ def handler(event, x, y, flags, param):
         temp_rect = ParkingSpace((dstart_x, dstart_y), width, height)
     elif event == cv2.EVENT_LBUTTONUP:
         drawing = False
-        spacesPos.append(temp_rect)
+        if temp_rect:
+            spacesPos.append(temp_rect)
         temp_rect = None
     elif event == cv2.EVENT_RBUTTONDOWN:
         for i, ps in enumerate(spacesPos):
@@ -40,35 +56,57 @@ def handler(event, x, y, flags, param):
                 spacesPos.pop(i)
                 break
 
+winname = "Layout Builder"
+cv2.namedWindow(winname, cv2.WINDOW_GUI_NORMAL)
+cv2.resizeWindow(winname, sd.window_width, sd.window_height)
 
-window_width, window_height = 1400, 900
-cv2.namedWindow('image', cv2.WINDOW_GUI_NORMAL)
-cv2.resizeWindow('image', window_width, window_height)
+def builder(path):
 
-while True:
-    img = cv2.imread('images/test-image.jpg')
-    resized_img = cv2.resize(img, (window_width, window_height))
-    cv2.imshow('image', resized_img)
-    if img is None:
-        print("Nie można załadować obrazu.")
-        break
+    while True:
+        img = cv2.imread(path)
+        resized_img = cv2.resize(img, (sd.window_width, sd.window_height))
+        cv2.imshow(winname, resized_img)
+        if img is None:
+            print("Nie można załadować obrazu.")
+            break
 
-    # Rysowanie wszystkich prostokątów
-    for parkingSpace in spacesPos:
-        pos1, pos2 = parkingSpace.beginEnd()
-        cv2.rectangle(img, pos1, pos2, (255, 0, 0), 2)
+        # Rysowanie wszystkich prostokątów
+        for parkingSpace in spacesPos:
+            pos1, pos2 = parkingSpace.beginEnd()
+            cv2.rectangle(img, pos1, pos2, (255, 0, 0), 2)
 
-    if temp_rect:
-        pos1, pos2 = temp_rect.beginEnd()
-        cv2.rectangle(img, pos1, pos2, (0, 255, 0), 2)
+        if temp_rect:
+            pos1, pos2 = temp_rect.beginEnd()
+            cv2.rectangle(img, pos1, pos2, (0, 255, 0), 2)
 
-    # Wyświetl obraz i ustaw handlera myszy
-    cv2.imshow('image', img)
-    cv2.setMouseCallback('image', handler)
+        # Wyświetl obraz i ustaw handlera myszy
+        cv2.imshow(winname, img)
+        cv2.setMouseCallback(winname, handler)
 
-    # Wyjście przy ESC
-    key = cv2.waitKey(1) & 0xFF
-    if key == 27:  # ESC
-        break
+        key = cv2.waitKey(1) & 0xFF
+        if key == 27:  # ESC
+            break
 
-cv2.destroyAllWindows()
+    cv2.destroyAllWindows()
+
+def parseArguments():
+    parser = ArgumentParser()
+    parser.add_argument("-i", "--image", dest="image", default="test-image.jpg", help="Nazwa obrazu")
+    parser.add_argument("-d", "--dir", dest="dir", default=sd.images_dir, help="Katalog")
+
+    return parser.parse_args()
+if __name__ == "__main__":
+    args = parseArguments()
+    image_path = args.dir + args.image
+    builder(image_path)
+    print(f"{len(spacesPos)} spaces selected.")
+
+    image_name = args.image.split(".")[0]
+    layout_file = sd.layouts_dir + image_name + sd.layout_ext
+
+    actions = {"yes": lambda: writeList(layout_file, spacesPos), "no": lambda: None}
+    text = "Do you want to save layout? [yes/no]: "
+    if os.path.isfile(layout_file):
+        text = "File already exists. Do you want to overwrite it? [yes/no]: "
+
+    prompt(text, actions)
