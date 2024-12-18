@@ -1,29 +1,10 @@
 import os
 import cv2
 import pickle
+import utils
+from utils import ParkingSpace
 import structureDefinitions as sd
 from argparse import ArgumentParser
-
-def prompt(text: str, actions: dict[str, callable]) -> None:
-    while True:
-        resp = input(text)
-        if resp in actions:
-            actions[resp]()
-            break
-
-class ParkingSpace:
-    def __init__(self, pos, width, height):
-        self.pos = pos
-        self.width = width
-        self.height = height
-
-    def inMe(self, x, y):
-        x1, y1 = self.pos
-        x2, y2 = x1 + self.width, y1 + self.height
-        return (x1 < x < x2) and (y1 < y < y2)
-
-    def beginEnd(self):
-        return self.pos, (self.pos[0] + self.width, self.pos[1] + self.height)
 
 spacesPos = []
 
@@ -109,4 +90,4 @@ if __name__ == "__main__":
     if os.path.isfile(layout_file):
         text = "File already exists. Do you want to overwrite it? [yes/no]: "
 
-    prompt(text, actions)
+    utils.prompt(text, actions)
