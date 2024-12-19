@@ -5,7 +5,7 @@ import datetime
 class DataBaseConnection:
 
     def __init__(self):
-        self.conn = sqlite3.connect('dataBase_PSIO.db')
+        self.conn = sqlite3.connect('database/dataBase_PSIO.db')
 
         if(self.conn == None):
             print("Connection to database failed")
@@ -31,10 +31,15 @@ class DataBaseConnection:
         result = result.fetchall()
         return result
 
-    def selectEmployeeCar(self, ID_EMPLOYEE, REG_PLATE_NO):
+    def selectEmployeeCar(self, REG_PLATE_NO):
         query = "SELECT * FROM CARS WHERE REG_PLATE_NO = ?"
+
+        result = self.cursor.execute(query, (REG_PLATE_NO,))
+        result = result.fetchall()
+        return result
 
 
 
 db = DataBaseConnection()
 
+print(db.selectEmployeeCar("EL7ZABS"))
