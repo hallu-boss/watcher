@@ -1,10 +1,14 @@
 import os
+from email.policy import default
+
 import cv2
 import pickle
 import utils
 from utils import ParkingSpace
 import structureDefinitions as sd
 from argparse import ArgumentParser
+
+default_iamge_path = "images/test-image.jpg"
 
 spacesPos = []
 
@@ -37,11 +41,10 @@ def handler(event, x, y, flags, param):
                 spacesPos.pop(i)
                 break
 
-winname = "Layout Builder"
-cv2.namedWindow(winname, cv2.WINDOW_GUI_NORMAL)
-cv2.resizeWindow(winname, sd.window_width, sd.window_height)
-
 def builder(path):
+    winname = "Layout Builder"
+    cv2.namedWindow(winname, cv2.WINDOW_GUI_NORMAL)
+    cv2.resizeWindow(winname, sd.window_width, sd.window_height)
 
     while True:
         img = cv2.imread(path)
@@ -72,18 +75,16 @@ def builder(path):
 
 def parseArguments():
     parser = ArgumentParser()
-    parser.add_argument("-i", "--image", dest="image", default="test-image.jpg", help="Nazwa obrazu")
-    parser.add_argument("-d", "--dir", dest="dir", default=sd.images_dir, help="Katalog")
+    # TODO --path zamiast --image i --dir
+    parser.add_argument("-p", "--path", dest="path", default=default_iamge_path, help="Ścieżka do obrazu [domyślnie :" + default_iamge_path + "]")
 
     return parser.parse_args()
 if __name__ == "__main__":
     args = parseArguments()
-    image_path = args.dir + args.image
-    builder(image_path)
+    builder(args.path)
     print(f"{len(spacesPos)} spaces selected.")
 
-    image_name = args.image.split(".")[0]
-    layout_file = sd.layouts_dir + image_name + sd.layout_ext
+    layout_file = sd.layout_path(args.path)
 
     actions = {"yes": lambda: writeList(layout_file, spacesPos), "no": lambda: None}
     text = "Do you want to save layout? [yes/no]: "
