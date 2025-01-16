@@ -15,13 +15,15 @@ def cut_smal_frame(frame):
         return frame
     return frame[200:500, 200:550]
 
-def image_sharpening(image):
+
+def image_sharpering(image):
     kernel_sharpen = np.array([
         [-1, -1, -1],
         [-1,  9, -1],
         [-1, -1, -1]
     ])
     return cv2.filter2D(image, -1, kernel_sharpen)
+
 
 def get_2_point(points):
     points_x = [points[i][0][0] for i in range(len(points))]
@@ -119,3 +121,7 @@ if __name__ == '__main__':
             print("Nie rozpoznano tablicy.")
     cap.release()
 cv2.destroyAllWindows()
+
+
+
+
