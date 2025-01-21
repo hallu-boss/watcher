@@ -29,14 +29,21 @@ class DataBaseConnection:
 
         result = self.cursor.execute(query, (ID_EMPLOYEE,))
         result = result.fetchall()
-        return result
+
+        if len(result) == 0:
+            return False
+
+        return True
 
     def selectEmployeeCar(self, REG_PLATE_NO):
         query = "SELECT * FROM CARS WHERE REG_PLATE_NO = ?"
 
         result = self.cursor.execute(query, (REG_PLATE_NO,))
         result = result.fetchall()
-        return result
+        if len(result) == 0:
+            return False
+
+        return True
 
 
 
