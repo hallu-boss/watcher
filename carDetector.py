@@ -96,8 +96,10 @@ class CarDetector:
         else:
             self.background_subtractor = background_subtractor
         self.total_frames = 0
+        self.t_cap = cv2.VideoCapture("recordings/rec1.AVI")
 
     def close(self):
+        self.t_cap.release()
         cv2.destroyAllWindows()
 
     def reset(self):
@@ -193,16 +195,16 @@ class CarDetector:
             car.draw(hud)
 
         # frame counter
-        cv2.putText(hud, f"Klatka: {idx}", (10, 20), cv2.FONT_HERSHEY_DUPLEX, 1, (255, 255, 255), 1)
+        cv2.putText(hud, f"Klatka: {self.total_frames}", (10, 20), cv2.FONT_HERSHEY_DUPLEX, 1, (255, 255, 255), 1)
 
         return hud
 
     def recalibration(self):
-        t_cap = cv2.VideoCapture("recordings/rec1.AVI")
+        self.t_cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
         max_frame = 70
         idx = 0
         while True:
-            ret, frame = t_cap.read()
+            ret, frame = self.t_cap.read()
             if not ret:
                 break
 
@@ -210,7 +212,6 @@ class CarDetector:
             if idx >= max_frame:
                 break
             idx += 1
-        t_cap.release()
 
 
 
