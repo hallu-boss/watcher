@@ -47,12 +47,20 @@ def builder(path):
     cv2.resizeWindow(winname, sd.window_width, sd.window_height)
 
     while True:
-        img = cv2.imread(path)
+        cap = cv2.VideoCapture(path)
+
+        if not cap.isOpened():
+            print(f"Could not open video {path}")
+            break
+
+        ret, img = cap.read()
+        if not ret:
+            print(f"Could not read video {path}")
+            break
+        cap.release()
+
         resized_img = cv2.resize(img, (sd.window_width, sd.window_height))
         cv2.imshow(winname, resized_img)
-        if img is None:
-            print("Nie można załadować obrazu.")
-            break
 
         # Rysowanie wszystkich prostokątów
         for parkingSpace in spacesPos:
@@ -75,10 +83,10 @@ def builder(path):
 
 def parseArguments():
     parser = ArgumentParser()
-    # TODO --path zamiast --image i --dir
     parser.add_argument("-p", "--path", dest="path", default=default_iamge_path, help="Ścieżka do obrazu [domyślnie :" + default_iamge_path + "]")
 
     return parser.parse_args()
+
 if __name__ == "__main__":
     args = parseArguments()
     builder(args.path)
