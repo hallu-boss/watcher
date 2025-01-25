@@ -183,6 +183,9 @@ class CarDetector:
 
     def __parkingManager(self):
         tolerance = 5
+
+        parked_val = 100
+        ocupying_val = 150
         if self.cars is not None:
             self.__updateCarOcupation(tolerance)
 
@@ -191,16 +194,16 @@ class CarDetector:
                 for key in keys:
                     if ocupying[key] == tolerance:
                         print(f"{car.getTag()} has parked at spot {key}")
-                        ocupying[key] = 100
+                        ocupying[key] = parked_val
 
-                # if len(keys) > 1:
-                #     if all(value is True or value == 12 for value in ocupying.values()):
-                #         print(f"{car.getTag()} is ocupying {keys} !!!")
-                #         for key in keys:
-                #             ocupying[key] = -2
+                if len(keys) > 1:
+                    if all(parked_val - tolerance < value <= parked_val for value in ocupying.values()):
+                        print(f"{car.getTag()} is ocupying {keys} !!!")
+                        for key in keys:
+                            ocupying[key] = ocupying_val
 
                 for key in keys:
-                    if ocupying[key] == 100 - tolerance:
+                    if ocupying[key] == parked_val - tolerance or ocupying[key] == ocupying_val - tolerance:
                         ocupying.pop(key)
                         print(f"{car.getTag()} left spot {key}")
 
@@ -312,7 +315,7 @@ if __name__ == '__main__':
     with open('layouts/rec1-layout', 'rb') as f:
         parking_spaces = pickle.load(f)
 
-    vis = False
+    vis = True
     path = 'recordings/'
     videos = ['rec2.AVI', 'rec3.AVI', 'rec4.AVI', 'rec5.AVI', 'rec6.AVI']
     exp = [['smart'], ['volvo'], [], ['cabrio'], []]
