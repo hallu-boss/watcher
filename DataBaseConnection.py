@@ -40,12 +40,11 @@ class DataBaseConnection:
 
         result = self.cursor.execute(query, (REG_PLATE_NO,))
         result = result.fetchall()
+
         if len(result) == 0:
             return False
 
         return True
-
-
 
 db = DataBaseConnection()
 
