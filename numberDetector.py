@@ -4,6 +4,9 @@ import easyocr
 import cv2
 from skimage.filters import threshold_otsu
 
+from carDetector import CarDetector
+
+
 class numberDetector:
     def validate_polish_license_plate(self, text):
         if text is None:
@@ -31,7 +34,7 @@ class numberDetector:
         # fx, ax = try_all_threshold(gray)
         # plt.show()
 
-        thresh= threshold_otsu(image)
+        thresh= threshold_otsu(gray)
         _, binary_thresh = cv2.threshold(gray, thresh, 255, cv2.THRESH_BINARY)
 
         # _, binary_thresh = cv2.threshold(gray, thresh, thresh + 10, cv2.THRESH_BINARY)
@@ -77,10 +80,10 @@ class numberDetector:
         cz1 = re.sub(r'[^A-Za-z0-9]', '', result_ocr[0][1]).upper()
         cz2 = re.sub(r'[^A-Za-z0-9]', '', result_ocr[1][1]).upper()
         ret = (cz2 + cz1 if 2 <= len(cz2) <= 3 else cz1 + cz2)
-        print(f'pierwszy ret {ret}')
+        # print(f'pierwszy ret {ret}')
         if ret[0] != 'E':
             ret = ret[1::]
-        print(f'drugi ret {ret}')
+        # print(f'drugi ret {ret}')
         return ret
 
     def recognition_plate(self, image):
@@ -110,7 +113,7 @@ class numberDetector:
 
         reader = easyocr.Reader(['pl', 'en'], gpu=True)
         result_ocr = reader.readtext(image_cleared)
-        print(result_ocr)
+        # print(result_ocr)
 
         plate_nr = ""
         if len(result_ocr) == 1:
@@ -122,26 +125,36 @@ class numberDetector:
         return self.validate_polish_license_plate(plate_nr)
 
 
-def number_plate(self, number_wideo):
-    default_dir = "recordings/wjazd/"
-    cap = cv2.VideoCapture(default_dir + str(number_wideo) + ".mod")
-    if not cap.isOpened():
-        print("Nie można otworzyć pliku wideo.")
-        return None
+    def number_plate(self, nr_wideo):
+        default_dir = "recordings/wjazd/"
+        cap = cv2.VideoCapture(default_dir + str(nr_wideo) + ".mod")
+        if not cap.isOpened():
+            print("Nie można otworzyć pliku wideo.")
+            return None
 
-    cap.set(cv2.CAP_PROP_POS_FRAMES, 25)
-    plate_all = []
+        cap.set(cv2.CAP_PROP_POS_FRAMES, 25)
+        plate_all = []
 
-    while cap.isOpened():
-        ret, frame = cap.read()
-        if not ret or frame is None:
-            break
+        while cap.isOpened():
+            ret, frame = cap.read()
+            if not ret or frame is None:
+                break
+            # cv2.imshow('frame', frame)
+            # cv2.waitKey(2)
+            frame = self.cut_smal_frame(frame)
+            plate_number = self.recognition_plate(frame)
+            if plate_number:
+                plate_all.append(plate_number)
+        cap.release()
 
-        frame = self.cut_smal_frame(frame)
-        plate_number = self.recognition_plate(frame)
-        if plate_number:
-            plate_all.append(plate_number)
-    cap.release()
+        return list(set(plate_all))
 
-    return list(set(plate_all))
+if __name__ == "__main__":
+    nd = numberDetector()
+    wynik = []
+    for i in range(1, 7):
+        wynik.append(nd.number_plate(nr_wideo=3))
+
+    print(wynik)
+
 
