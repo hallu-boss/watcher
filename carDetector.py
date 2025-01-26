@@ -243,7 +243,7 @@ class CarDetector:
         return mask
 
     def __getContours(self, mask):
-        contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
         return [contour for contour in contours if 5000 < cv2.contourArea(contour) < 30000]
 
@@ -257,7 +257,7 @@ class CarDetector:
                         self.cars = [(BoundingBox(tag, br), {})]
                     else:
                         self.cars.append((BoundingBox(tag, br), {}))
-                continue
+                    continue
             if self.cars is not None:
                 for car, _ in self.cars:
                     if car.isSuccesor(br):
