@@ -4,8 +4,6 @@ import easyocr
 import cv2
 from skimage.filters import threshold_otsu
 
-from carDetector import CarDetector
-
 
 class numberDetector:
     def validate_polish_license_plate(self, text):
@@ -148,6 +146,7 @@ class numberDetector:
         cap.release()
 
         return list(set(plate_all))
+
 
 if __name__ == "__main__":
     nd = numberDetector()
