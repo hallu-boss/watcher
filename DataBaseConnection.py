@@ -69,10 +69,4 @@ class DataBaseConnection:
 
 
 
-db = DataBaseConnection()
-
-print(db.selectEmployeeCar("EL7ZABS"))
-
-print(db.checkEmployeePlace(1,"EL7ZABS"))
-
 
