@@ -68,5 +68,15 @@ class DataBaseConnection:
         return bool(result[0])
 
 
+    def clearEvents(self):
+        query = "DELETE FROM EVENTS"
+        self.cursor.execute(query)
 
+    def displayEvents(self):
+        query = "SELECT * FROM EVENTS"
+        result = self.cursor.execute(query)
 
+        result = result.fetchall()
+
+        for row in result:
+            print(row)
