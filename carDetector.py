@@ -1,5 +1,5 @@
 import pickle
-from typing import List, Optional, Tuple, Dict
+from typing import List, Optional, Tuple, Dict, Callable
 import cv2
 from cv2 import BackgroundSubtractorKNN
 from utils import ParkingSpace
@@ -91,6 +91,9 @@ class CarDetector:
 
     def __init__(self,
                  parking_spaces: List[ParkingSpace],
+                 msg_fun: Callable[[str, str], None],
+                 parked_fun: Callable[[str, int], None],
+                 left_fun: Callable[[str, int], None],
                  cars: Optional[List[Tuple[BoundingBox, Dict[int, int]]]] = None,
                  background_subtractor: Optional[BackgroundSubtractorKNN] = None):
 
@@ -102,6 +105,9 @@ class CarDetector:
             self.background_subtractor = background_subtractor
         self.total_frames = 0
         self.parking_spaces = parking_spaces
+        self.msg_fun = msg_fun
+        self.parked_fun = parked_fun
+        self.left_fun = left_fun
         self.t_cap = cv2.VideoCapture("recordings/rec1.AVI")
 
     def close(self):
@@ -159,7 +165,7 @@ class CarDetector:
                 if len(ocupying.keys()) > 0:
                     continue
                 if self.__on_exit(car.getBoundingRect()):
-                    print(f"{car.getTag()} left parking")
+                    self.msg_fun(car.getTag(), f"left parking")
                     to_pop.append(i)
             for i in to_pop:
                 self.cars.pop(i)
@@ -193,19 +199,19 @@ class CarDetector:
                 keys = list(ocupying.keys())
                 for key in keys:
                     if ocupying[key] == tolerance:
-                        print(f"{car.getTag()} has parked at spot {key}")
+                        self.parked_fun(car.getTag(), key)
                         ocupying[key] = parked_val
 
                 if len(keys) > 1:
                     if all(parked_val - tolerance < value <= parked_val for value in ocupying.values()):
-                        print(f"{car.getTag()} is ocupying {keys} !!!")
+                        self.msg_fun(car.getTag(), f"parked at {keys} !!!")
                         for key in keys:
                             ocupying[key] = ocupying_val
 
                 for key in keys:
                     if ocupying[key] == parked_val - tolerance or ocupying[key] == ocupying_val - tolerance:
                         ocupying.pop(key)
-                        print(f"{car.getTag()} left spot {key}")
+                        self.left_fun(car.getTag(), key)
 
     def __on_exit(self, bounding_rect):
         x, y, w, h = bounding_rect
@@ -257,6 +263,8 @@ class CarDetector:
                         self.cars = [(BoundingBox(tag, br), {})]
                     else:
                         self.cars.append((BoundingBox(tag, br), {}))
+                    car, _ = self.cars[-1]
+                    self.msg_fun(car.getTag(), f"entered parking")
                     continue
             if self.cars is not None:
                 for car, _ in self.cars:
