@@ -40,12 +40,33 @@ class DataBaseConnection:
 
         result = self.cursor.execute(query, (REG_PLATE_NO,))
         result = result.fetchall()
-
         if len(result) == 0:
             return False
 
         return True
 
-db = DataBaseConnection()
 
-print(db.selectEmployeeCar("EL7ZABS"))
+    def checkEmployeePlace(self, Parking_space_number, REG_PLATE_NO):
+        query = """
+            SELECT 
+                E.PARKING_SPACE_NO = ? AS is_correct
+            FROM 
+                CARS C
+            JOIN 
+                EMPLOYEES E 
+            ON 
+                C.ID_EMPLOYEE = E.ID_EMPLOYEE
+            WHERE 
+                C.REG_PLATE_NO = ?;
+            """
+
+        self.cursor.execute(query, (Parking_space_number, REG_PLATE_NO))
+        result = self.cursor.fetchone()
+
+        if result is None:
+            return None
+        return bool(result[0])
+
+
+
+
