@@ -153,7 +153,7 @@ if __name__ == "__main__":
     nd = numberDetector()
     wynik = []
     for i in range(1, 7):
-        wynik.append(nd.number_plate(nr_wideo=3))
+        wynik.append(nd.number_plate(nr_wideo=i))
 
     print(wynik)
 
