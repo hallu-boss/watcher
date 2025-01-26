@@ -41,7 +41,7 @@ class numberDetector:
 
         ret_approx = []
         for contour in sorted_contours:
-            epsilon = 0.01 * cv2.arcLength(contour, True)
+            epsilon = 0.02 * cv2.arcLength(contour, True)
             approx = cv2.approxPolyDP(contour, epsilon, True)
             cv2.drawContours(image, [approx], -1, (0, 0, 255), 2)
             # print(cv2.contourArea(contour))
@@ -151,7 +151,8 @@ class numberDetector:
 if __name__ == "__main__":
     nd = numberDetector()
     wynik = []
-    wynik.append(nd.number_plate(nr_wideo=6))
+    for i in range(1, 7):
+        wynik.append(nd.number_plate(nr_wideo=i))
 
     print(wynik)
 
