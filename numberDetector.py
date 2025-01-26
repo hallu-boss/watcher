@@ -32,7 +32,7 @@ class numberDetector:
         # fx, ax = try_all_threshold(gray)
         # plt.show()
 
-        thresh= threshold_otsu(gray)
+        thresh= threshold_otsu(image)
         _, binary_thresh = cv2.threshold(gray, thresh, 255, cv2.THRESH_BINARY)
 
         # _, binary_thresh = cv2.threshold(gray, thresh, thresh + 10, cv2.THRESH_BINARY)
@@ -41,7 +41,7 @@ class numberDetector:
 
         ret_approx = []
         for contour in sorted_contours:
-            epsilon = 0.01 * cv2.arcLength(contour, True)
+            epsilon = 0.02 * cv2.arcLength(contour, True)
             approx = cv2.approxPolyDP(contour, epsilon, True)
             cv2.drawContours(image, [approx], -1, (0, 0, 255), 2)
             # print(cv2.contourArea(contour))
@@ -91,7 +91,7 @@ class numberDetector:
         plate_image = self.get_image_plate(image)
         if plate_image is None:
             return None
-
+        # cv2.imshow('frame', plate_image)
         gray = cv2.cvtColor(plate_image, cv2.COLOR_BGR2GRAY)
 
 
@@ -109,7 +109,7 @@ class numberDetector:
         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
         image_cleared = cv2.morphologyEx(thresh, cv2.MORPH_ERODE, kernel).astype(np.uint8)
 
-        reader = easyocr.Reader(['pl', 'en'], gpu=True)
+        reader = easyocr.Reader(['en'], gpu=True)
         result_ocr = reader.readtext(image_cleared)
         # print(result_ocr)
 
