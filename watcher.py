@@ -15,11 +15,11 @@ def parked(car: str, spot: int) -> None:
     if not database.checkEmployeePlace(spot, car):
         simple_msg(car, f"parked at wrong spot [{spot}] !!!")
     else:
-        print(f"{car} parked  at {spot}")
+        print(f"{car} parked at {spot}")
     del database
 
 def left(car: str, spot: int) -> None:
-    print(f"{car} left  at {spot}")
+    print(f"{car} left spot {spot}")
 
 def simple_msg(car:str, msg:str) -> None:
     print(f"{car} -> {msg}")
@@ -46,7 +46,7 @@ def car_detector_thread(queue: Queue) -> None:
 
 def licence_plate_reader_thread(queue: Queue,) -> None:
     # recordings = [1, 3, None, 6, None, None]
-    recordings = ['ELAGF92', 'EL0GVA0', None, 'EZGB0AF', None, None]
+    recordings = ['ELAGF92', 'EL0GVA0', None, 'ELAVGTF', None, None]
 
     # nd = numberDetector()
 
