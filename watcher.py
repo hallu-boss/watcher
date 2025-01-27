@@ -1,7 +1,8 @@
 import pickle
 import threading
+import DataBaseConnection as db
 from queue import Queue
-from typing import Callable
+from typing import Callable, List
 from carDetector import CarDetector
 from numberDetector import numberDetector
 
@@ -9,8 +10,21 @@ path = 'recordings/'
 
 cd_sem = threading.Semaphore()
 
-def save_to_db(car:str, msg: str) -> None:
+def save_to_db(car:str, spots: List[int], event: int = 0, msg: str = None) -> None:
+    pass
+
+def parked(car: str, spot: int) -> None:
+    print(f"{car} parked  at {spot}")
+
+def left(car: str, spot: int) -> None:
+    print(f"{car} left  at {spot}")
+
+def simple_msg(car:str, msg:str) -> None:
     print(f"{car} -> {msg}")
+    local_database = db.DataBaseConnection()
+    local_database.insertEvent(1, f"{car} -> {msg}")
+    del local_database
+
 
 def car_detector_thread(queue: Queue, handle_msg: Callable[[str, str], None]) -> None:
     recordings = ['rec2.AVI', 'rec3.AVI', 'rec4.AVI', 'rec5.AVI', 'rec6.AVI', 'rec7.AVI']
@@ -19,7 +33,7 @@ def car_detector_thread(queue: Queue, handle_msg: Callable[[str, str], None]) ->
     with open('layouts/rec1-layout', 'rb') as f:
         parking_spaces = pickle.load(f)
 
-    car_detector = CarDetector(parking_spaces)
+    car_detector = CarDetector(parking_spaces, simple_msg, parked, left)
 
     for video, frame_pair in zip(recordings, frames):
         expecting = queue.get()
@@ -49,3 +63,10 @@ if __name__ == '__main__':
     lpr_thread.start()
     cd_thread = threading.Thread(target=car_detector_thread, args=(lp_queue,save_to_db))
     cd_thread.start()
+
+    cd_thread.join()
+    lpr_thread.join()
+
+    database = db.DataBaseConnection()
+    database.displayEvents()
+    database.clearEvents()
