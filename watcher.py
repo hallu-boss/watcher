@@ -10,11 +10,13 @@ path = 'recordings/'
 
 cd_sem = threading.Semaphore()
 
-def save_to_db(car:str, spots: List[int], event: int = 0, msg: str = None) -> None:
-    pass
-
 def parked(car: str, spot: int) -> None:
-    print(f"{car} parked  at {spot}")
+    database = db.DataBaseConnection()
+    if not database.checkEmployeePlace(spot, car):
+        simple_msg(car, f"parked at wrong spot [{spot}] !!!")
+    else:
+        print(f"{car} parked  at {spot}")
+    del database
 
 def left(car: str, spot: int) -> None:
     print(f"{car} left  at {spot}")
@@ -22,11 +24,11 @@ def left(car: str, spot: int) -> None:
 def simple_msg(car:str, msg:str) -> None:
     print(f"{car} -> {msg}")
     local_database = db.DataBaseConnection()
-    local_database.insertEvent(1, f"{car} -> {msg}")
+    local_database.insertEvent(car, f"{msg}")
     del local_database
 
 
-def car_detector_thread(queue: Queue, handle_msg: Callable[[str, str], None]) -> None:
+def car_detector_thread(queue: Queue) -> None:
     recordings = ['rec2.AVI', 'rec3.AVI', 'rec4.AVI', 'rec5.AVI', 'rec6.AVI', 'rec7.AVI']
     frames = [(10, 500), (10, 540), (10, 290), (20, 410), (10, 540), (300, 20000)]
 
@@ -44,7 +46,7 @@ def car_detector_thread(queue: Queue, handle_msg: Callable[[str, str], None]) ->
 
 def licence_plate_reader_thread(queue: Queue,) -> None:
     # recordings = [1, 3, None, 6, None, None]
-    recordings = ['ELAGF9Z', 'EL0GVA0', None, 'EZGB0AF', None, None]
+    recordings = ['ELAGF92', 'EL0GVA0', None, 'EZGB0AF', None, None]
 
     # nd = numberDetector()
 
@@ -61,7 +63,7 @@ if __name__ == '__main__':
     lp_queue = Queue()
     lpr_thread = threading.Thread(target=licence_plate_reader_thread, args=(lp_queue,), daemon=True)
     lpr_thread.start()
-    cd_thread = threading.Thread(target=car_detector_thread, args=(lp_queue,save_to_db))
+    cd_thread = threading.Thread(target=car_detector_thread, args=(lp_queue,))
     cd_thread.start()
 
     cd_thread.join()
