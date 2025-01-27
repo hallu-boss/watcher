@@ -264,7 +264,7 @@ class CarDetector:
                     else:
                         self.cars.append((BoundingBox(tag, br), {}))
                     car, _ = self.cars[-1]
-                    self.caller(car.getTag(), f"entered parking")
+                    self.msg_fun(car.getTag(), f"entered parking")
                     continue
             if self.cars is not None:
                 for car, _ in self.cars:
