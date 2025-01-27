@@ -16,12 +16,21 @@ class DataBaseConnection:
     def __del__(self):
         self.conn.close()
 
-    def insertEvent(self, ID_EMPLOYEE , DESCRIPTION ):
+    def insertEvent(self, REG_PLATE_NO , DESCRIPTION ):
+
+        query_select_employee = "SELECT ID_EMPLOYEE FROM CARS WHERE REG_PLATE_NO = ?"
+        self.cursor.execute(query_select_employee, (REG_PLATE_NO,))
+        id_employee_row = self.cursor.fetchone()
+
+        if id_employee_row is None:
+            raise ValueError(f"Nie znaleziono pracownika dla REG_PLATE_NO: {REG_PLATE_NO}")
+
+        id_employee = id_employee_row[0]
 
         EVENT_TIME = datetime.datetime.now()
         query = "INSERT INTO EVENTS (ID_EMPLOYEE, EVENT_TIME, DESCRIPTION) VALUES (?,?,?)"
 
-        self.cursor.execute(query, (ID_EMPLOYEE, EVENT_TIME, DESCRIPTION))
+        self.cursor.execute(query, (id_employee, EVENT_TIME, DESCRIPTION))
         self.conn.commit()
 
     def selectEmployee(self, ID_EMPLOYEE):
@@ -71,6 +80,7 @@ class DataBaseConnection:
     def clearEvents(self):
         query = "DELETE FROM EVENTS"
         self.cursor.execute(query)
+        self.conn.commit()
 
     def displayEvents(self):
         query = "SELECT * FROM EVENTS"
@@ -80,3 +90,8 @@ class DataBaseConnection:
 
         for row in result:
             print(row)
+
+db = DataBaseConnection()
+
+db.insertEvent("ELAGF92", "test")
+db.clearEvents()
