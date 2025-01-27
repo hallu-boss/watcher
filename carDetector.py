@@ -79,8 +79,8 @@ class BoundingBox:
         (text_w, text_h), baseline = cv2.getTextSize(self.tag, text_params[0], text_params[1], text_params[3])
         cv2.rectangle(frame, (x, y), (x + text_w, y + text_h + baseline), color, -1)
         cv2.putText(frame, self.tag, (x, y + text_h), text_params[0], text_params[1], text_params[2], text_params[3])
-        cv2.circle(frame, box_center(self.bounding_rect), radius=1, color=(0, 255, 255), thickness=2)
-        cv2.circle(frame, box_center(self.bounding_rect), radius=BoundingBox.dist_tolerance, color=(255, 255, 0), thickness=2)
+        # cv2.circle(frame, box_center(self.bounding_rect), radius=1, color=(0, 255, 255), thickness=2)
+        # cv2.circle(frame, box_center(self.bounding_rect), radius=BoundingBox.dist_tolerance, color=(255, 255, 0), thickness=2)
 
 class CarDetector:
     entry_start = (130, 260)
@@ -137,7 +137,7 @@ class CarDetector:
             self.__popLeavingCars()
 
             hud = self.__getHUD(frame, frame_idx)
-            cv2.drawContours(hud, contours, -1, (255, 0, 255), 2)
+            # cv2.drawContours(hud, contours, -1, (255, 0, 255), 2)
 
 
 
