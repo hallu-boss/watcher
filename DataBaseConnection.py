@@ -91,7 +91,3 @@ class DataBaseConnection:
         for row in result:
             print(row)
 
-db = DataBaseConnection()
-
-db.insertEvent("ELAGF92", "test")
-db.clearEvents()
